@@ -5,22 +5,25 @@ action_type=POINTER_BUTTON
 pressed="pressed,"
 
 readarray -t devices <<<$(libinput list-devices | grep pointer -B3 | grep -o '/dev/input/event[1-9]*')
+target=$(libinput list-devices | grep [Kk]eyboard -A1 | grep -m1 -o 'event[1-9]*')
+
+echo "$target is selected for sending events"
 
 # COMMANDS MAP
-BTN_EXTRA=(KEY_LEFTMETA KEY_PAGEUP)
-BTN_SIDE=(KEY_LEFTMETA KEY_PAGEDOWN)
+BTN_EXTRA=(KEY_LEFTCTRL KEY_TAB)
+BTN_SIDE=(KEY_LEFTCTRL KEY_LEFTSHIFT KEY_TAB)
+BTN_FORWARD=(KEY_LEFTCTRL KEY_W)
 
 function pressKey(){
-    device=$1; key=$2; value=$3
+    device=$target; key=$2; value=$3
     echo "pressing ${key} ${value}"
-    evemu-event /dev/input/${device} --sync --type ${event_type} --code ${key} --value ${value};
+    evemu-event /dev/input/${device} --sync --type ${event_type} --code ${key} --value ${value}
 }
 
 function pressCommand(){
     device=$1; button=$2; movement=$3
     var=$button[@]
     command=${!var}
-
     if [ ${movement} = ${pressed} ]; then
         for key in ${command}; do
             pressKey ${device} ${key} 1
